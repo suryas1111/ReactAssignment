@@ -1,0 +1,23 @@
+.container {
+    position: relative;
+    padding-left: 15px;
+    margin-bottom: 12px;
+  }
+  
+  .checkmark {
+    position: absolute;
+    top: 7px;
+    left: 0;
+    height: 10px;
+    width: 12px;
+    border-radius: 50%;
+  }
+
+  .filter{
+      display: flex;
+      justify-content: space-between;
+  }
+  
+  
+  
+  
