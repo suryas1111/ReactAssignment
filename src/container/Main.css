@@ -17,6 +17,15 @@
       display: flex;
       justify-content: space-between;
   }
+
+  .table{
+    width:100%;
+  }
+
+  .headerRow{
+    background-color:blue;
+    color: white;
+}
   
   
   
