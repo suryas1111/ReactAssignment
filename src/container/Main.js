@@ -3,16 +3,17 @@ import { connect } from 'react-redux';
 import {getData} from '../store/action';
 import Search from '../component/Search';
 import FilterByDate from '../component/FilterByDate';
+import CampaignTable from '../component/CampaignTable';
 import moment from 'moment';
 import './Main.css';
 
 class Main extends Component {
-
     state={
         sDate:"",
         edate:"",
         value:"",
-        searchData:[]
+        searchData:[],
+        filterData:[]
     }
 
     componentDidMount () {
@@ -34,71 +35,62 @@ class Main extends Component {
         return campaignData;
     }
 
-    search=(event)=>{
+    search=(event)=>{        
         let searchData=this.setData().filter(ele=>ele.username.toLowerCase().includes(event.target.value.toLowerCase()));
-        this.setState({searchData});
+        this.setState({searchData,filterData:[]});
     }
 
-    setEDate=(event)=>{        
-        let date=moment(event.target.value).format('DD MM YYYY');
+    setEDate=(event)=>{   
+        console.log(moment(event.target.value).format('MM/DD/YYYY'))     
+        let date=moment(event.target.value).format('MM/DD/YYYY');
         this.setState({edate:date});
     }
 
     setSDate=(event)=>{
-        let date=moment(event.target.value).format('DD MM YYYY');
+        console.log(moment(event.target.value).format('MM/DD/YYYY'));
+        let date=moment(event.target.value).format('MM/DD/YYYY');
         this.setState({sdate:date});
     }
 
     filterByDate=()=>{
-        let filterData=this.setData().filter(ele=>{
-            return ele.startDate>this.state.sdate && this.state.edate<ele.endDate;
+        let sdate = document.getElementById('sdate');
+        let edate = document.getElementById('edate');
+        //erase the input value
+        sdate.value = '';
+        edate.value = '';
+        //prevent error on older browsers (aka IE8)
+        if (sdate.type === 'date') {
+            sdate.type = 'text';
+            sdate.type = 'date';
+        }
+        if (edate.type === 'date') {
+            edate.type = 'text';
+            edate.type = 'date';
+        }
+        let dataToFilter=this.state.searchData.length>0?this.state.searchData:this.setData();
+        let filterData=dataToFilter.filter(ele=>{
+            return ele.startDate>this.state.sdate && this.state.edate>ele.endDate;
         });
 
         console.log(filterData);
+        this.setState({filterData});
     }
 
     renderList=()=>{
-        let displayData=this.state.searchData.length>0?this.state.searchData:this.setData();
-
-        return displayData.map(ele=>{
-            let budget=Math.ceil(ele.Budget/1000);
-            return(
-                <tr key={ele.userId}>
-                    <td>
-                        {"Campaign "+ele.id}
-                    </td>
-                    <td>
-                        {ele.username}
-                    </td>
-                    <td>
-                        {ele.startDate}
-                    </td>
-                    <td>
-                        {ele.endDate}
-                    </td>
-                    <td>
-                    <label className="container">Active
-                        <span className="checkmark" style={{backgroundColor:"green"}}></span>
-                    </label>
-                    </td>
-                    <td>
-                        {budget+"K USD"}
-                    </td>
-                </tr>
-            );
-        })
+        let displayData=this.state.filterData.length>0?this.state.filterData:this.state.searchData.length>0?this.state.searchData:this.setData();
+        return <CampaignTable displayData={displayData} /> ;        
     }
 
     render() {
             return (
             <div>
                 <div className="filter">
-                <FilterByDate setSDate={this.setSDate} setEDate={this.setEDate} onSubmit={this.filterByDate}/>
+                <FilterByDate setSDate={this.setSDate} setEDate={this.setEDate} sDate={this.state.sDate} onSubmit={this.filterByDate}/>
                 <Search value={this.state.value} onChange={this.search}/>
                 </div>
-                {<table>
+                <table className="table">
                     <thead>
-                    <tr>
+                    <tr className="headerRow">
                         <th>Name</th>
                         <th>User Name</th>
                         <th>Start Date</th>
@@ -110,7 +102,7 @@ class Main extends Component {
                     <tbody>
                     {this.renderList()}
                     </tbody>                   
-                </table>}
+                </table>
             </div>
             );
         }
